@@ -54,7 +54,7 @@ jobs:
             terraform init -force-copy
             terraform workspace new ${CIRCLE_BRANCH}
       - save_cache:
-          key: {{ .Branch }}-{{ .Revision }}
+          key: cache-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/handson-fargate-with-terraform
   plan:
@@ -64,7 +64,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - {{ .Branch }}-{{ .Revision }}
+            - cache-{{ .Branch }}-{{ .Revision }}
       - run:
           name: plan
           command: |
@@ -76,7 +76,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - {{ .Branch }}-{{ .Revision }}
+            - cache-{{ .Branch }}-{{ .Revision }}
       - run:
           name: plan
           command: |
@@ -95,7 +95,7 @@ jobs:
             terraform init -force-copy
             terraform workspace new master
       - save_cache:
-          key: {{ .Branch }}-{{ .Revision }}-pr
+          key: cache-{{ .Branch }}-{{ .Revision }}-pr
           paths:
             - ~/handson-fargate-with-terraform
   plan_pr:
@@ -105,7 +105,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - {{ .Branch }}-{{ .Revision }}-pr
+            - cache-{{ .Branch }}-{{ .Revision }}-pr
       - run:
           name: plan
           command: |
