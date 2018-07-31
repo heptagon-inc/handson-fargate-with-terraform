@@ -52,7 +52,7 @@ jobs:
           name: init
           command: |
             terraform init -force-copy
-            terraform workspace new ${CIRCLE_BRANCH}
+            terraform workspace select ${CIRCLE_BRANCH}
       - save_cache:
           key: cache-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -93,7 +93,7 @@ jobs:
           name: init
           command: |
             terraform init -force-copy
-            terraform workspace new master
+            terraform workspace select master
       - save_cache:
           key: cache-{{ .Branch }}-{{ .Revision }}-pr
           paths:
