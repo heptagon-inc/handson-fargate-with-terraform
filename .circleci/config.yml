@@ -1,0 +1,112 @@
+workflows:
+  version: 2
+  main:
+    jobs:
+      - checkout_code:
+          filters:
+            branches:
+              only:
+                - master
+                - staging
+      - init:
+          requires:
+            - checkout_code
+      - plan:
+          requires:
+            - init
+      - apply:
+          requires:
+            - plan
+      - init_pr:
+          requires:
+            - checkout_code
+          filters:
+            branches:
+              only:
+                - staging
+      - plan_pr:
+          requires:
+            - init_pr
+
+version: 2
+jobs:
+  checkout_code:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - save_cache:
+          key: code-{{ epoch }}
+          paths:
+            - ~/handson-fargate-with-terraform
+  init:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - restore_cache:
+          keys:
+            - code-{{ epoch }}
+      - run:
+          name: init
+          command: |
+            terraform init -force-copy
+            terraform workspace new ${CIRCLE_BRANCH}
+      - save_cache:
+          key: ${CIRCLE_BRANCH}-{{ epoch }}
+          paths:
+            - ~/handson-fargate-with-terraform
+  plan:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - restore_cache:
+          keys:
+            - ${CIRCLE_BRANCH}-{{ epoch }}
+      - run:
+          name: plan
+          command: |
+            terraform plan
+  apply:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - restore_cache:
+          keys:
+            - ${CIRCLE_BRANCH}-{{ epoch }}
+      - run:
+          name: plan
+          command: |
+            terraform apply -auto-approve
+  init_pr:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - restore_cache:
+          keys:
+            - code-{{ epoch }}
+      - run:
+          name: init
+          command: |
+            terraform init -force-copy
+            terraform workspace new master
+      - save_cache:
+          key: ${CIRCLE_BRANCH}-{{ epoch }}-pr
+          paths:
+            - ~/handson-fargate-with-terraform
+  plan_pr:
+    working_directory: ~/handson-fargate-with-terraform
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - restore_cache:
+          keys:
+            - ${CIRCLE_BRANCH}-{{ epoch }}-pr
+      - run:
+          name: plan
+          command: |
+            terraform plan
