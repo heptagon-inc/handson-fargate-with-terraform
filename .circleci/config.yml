@@ -78,7 +78,7 @@ jobs:
           keys:
             - cache-{{ .Branch }}-{{ .Revision }}
       - run:
-          name: plan
+          name: apply
           command: |
             terraform apply -auto-approve
   init_pr:
